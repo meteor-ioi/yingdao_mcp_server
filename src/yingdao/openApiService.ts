@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { AxiosInstance } from 'axios';
+import FormData from 'form-data';
 import { TokenManager } from './tokenManager.js';
 import i18n from '../i18n/index.js';
 
@@ -69,15 +70,14 @@ export class OpenApiService {
       throw new Error(i18n.t('rpaService.error.unsupportedFileType'));
     }
 
-    // Create FormData and convert file to Blob
+    // Create FormData and append the file
     const formData = new FormData();
-    const blob = typeof file === 'string' ? new Blob([file]) : new Blob([file]);
-    formData.append('file', blob, fileName);
+    formData.append('file', file, fileName);
 
     try {
       const response = await this.client.post('/dispatch/v2/file/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          ...formData.getHeaders(),
         },
         maxBodyLength: 10 * 1024 * 1024 // 10MB limit
       });
